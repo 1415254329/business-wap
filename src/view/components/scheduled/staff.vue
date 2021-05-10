@@ -64,7 +64,6 @@ export default {
   },
   computed: {
     filterData: function () {
-      console.log(this.$parent.filterStaff);
       return this.$parent.filterStaff;
     },
   },
@@ -139,7 +138,7 @@ export default {
           eve_amount: null,
           time_type: 1,
           week: [],
-          project_list: null,
+          project_list: [],
           rest_day_list: {
             date: [],
             period: [[], [], [], [], [], [], []],
@@ -151,6 +150,7 @@ export default {
         };
         if (res.data) {
           res.data.rest_day_list = JSON.parse(res.data.rest_day_list);
+          res.data.project_list = res.data.project_list.split(",")
           this.$refs.edit.initData(res.data);
           this.$refs.edit.formData = res.data;
         }

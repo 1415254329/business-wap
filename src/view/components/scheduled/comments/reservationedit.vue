@@ -246,7 +246,6 @@ export default {
     },
   },
   created() {
-    console.log(this.$parent.$parent);
     this.getDepartmentList();
     this.header = {
       Authorization: getToken(),

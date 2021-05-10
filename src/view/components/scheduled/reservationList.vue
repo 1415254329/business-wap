@@ -25,6 +25,9 @@
           <el-button @click="handleClick(scope.row)" type="success" size="small"
             >编辑</el-button
           >
+           <!-- <el-button  type="success" size="small" @click="$router.push('./business/buy/good')"
+            >到店</el-button
+          > -->
         </template>
       </el-table-column>
     </el-table>
@@ -111,7 +114,6 @@ export default {
     },
   },
   created() {
-    console.log(this.$parent);
     this.getScheduledList();
   },
 };

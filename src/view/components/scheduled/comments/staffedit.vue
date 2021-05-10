@@ -22,13 +22,18 @@
               <el-radio :label="1">半点</el-radio>
               <el-radio :label="2">整点</el-radio>
               <el-radio :label="3">十分</el-radio>
+              <el-radio :label="4">十五分</el-radio>
+              <el-radio :label="5">二十分</el-radio>
             </el-radio-group>
           </el-form-item>
           <el-form-item label="可服务项目列表">
             <el-select
-              v-model="formData.project_list"
+              v-model="isServerList"
               placeholder="请选择"
               value-key="id"
+              multiple
+          
+              
             >
               <el-option
                 v-for="item in filterServeData"
@@ -170,6 +175,7 @@ export default {
   },
   data() {
     return {
+      isServerList: ["烫发"],
       offday: {
         date: null,
         time: null,
@@ -246,6 +252,7 @@ export default {
         this.reservationTime.canRe[item] = 1;
       });
       this.formData.week = this.reservationTime.canRe; //formData.week
+      this.formData.project_list = this.isServerList;
       let urlData = `${this.id}?`;
       for (let key in this.formData) {
         urlData = urlData + `&${key}=${this.formData[key]}`;
@@ -299,7 +306,6 @@ export default {
     },
 
     initData(e) {
-     
       let canRe = e.week.split(",");
       canRe.forEach((item, index) => {
         if (item == "1") {
@@ -316,6 +322,7 @@ export default {
           this.reservationTime.tags.push(`${this.week[index].name} ${time}`);
         });
       });
+      this.isServerList = e.project_list
     },
   },
   created() {

@@ -2,7 +2,7 @@
   <div class="consume">
     <Card class="info">
       <div class="row">
-        <member-search :memberList="memberList" @selected="handleMemberSelect" class="search-member">
+        <member-search :memberList="memberList" @selected="handleMemberSelect" class="search-member" >
           <template slot="prepend">
             会员搜索
           </template>
@@ -239,7 +239,7 @@ export default {
   },
   created () {
     this.componentName = this.$route.params.type
-    this.init()
+    this.init();
   },
   methods: {
     ...mapMutations(['closeTag']),

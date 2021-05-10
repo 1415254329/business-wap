@@ -2,21 +2,24 @@
   <div>
     <div style="background-color: #fff; padding: 20px 0">
       <el-form ref="form" :model="form" label-width="160px">
+        <el-form-item label="店铺名称">
+          <el-input v-model="form.store_name" class="input" disabled></el-input>
+        </el-form-item>
         <el-form-item label="logo">
           <el-upload
             :headers="header"
             name="img"
             :action="url"
             list-type="picture-card"
-            :on-preview="handlePictureCardPreview"
+            :on-preview="(file) => handlePictureCardPreview(file, 'logo')"
             :limit="1"
-            :on-success="getImgurl"
+            :on-success="(file) => getImgurl(file, 'logo')"
             :file-list="blFileList"
           >
             <i class="el-icon-plus"></i>
           </el-upload>
-          <el-dialog :visible.sync="dialogVisible">
-            <img width="100%" :src="dialogImageUrl" alt="" />
+          <el-dialog :visible.sync="logo.dialogVisible">
+            <img width="100%" :src="logo.dialogImageUrl" alt="" />
           </el-dialog>
         </el-form-item>
         <el-form-item label="小程序封面图">
@@ -26,10 +29,10 @@
             :action="url"
             list-type="picture-card"
             :limit="5"
-            :on-preview="handlePictureCardPreview1"
+            :on-preview="(file) => handlePictureCardPreview(file, 'banner')"
             :file-list="banner.blFileList"
-            :on-remove="delImg"
-            :on-success="successBanner"
+            :on-remove="(file, fileList) => delImg(file, fileList, 'xcx_event')"
+            :on-success="(file) => getImgurl(file, 'xcx_event')"
           >
             <i class="el-icon-plus"></i>
           </el-upload>
@@ -37,9 +40,25 @@
             <img width="100%" :src="banner.dialogImageUrl" alt="" />
           </el-dialog>
         </el-form-item>
-        <el-form-item label="店铺名称">
-          <el-input v-model="form.store_name" class="input" disabled></el-input>
+        <el-form-item label="小程序作品图">
+          <el-upload
+            :headers="header"
+            name="img"
+            :action="url"
+            list-type="picture-card"
+            :limit="10"
+            :on-preview="(file) => handlePictureCardPreview(file, 'xcx_expo')"
+            :file-list="xcx_expo.blFileList"
+            :on-remove="(file, fileList) => delImg(file, fileList, 'xcx_expo')"
+            :on-success="(file) => getImgurl(file, 'xcx_expo')"
+          >
+            <i class="el-icon-plus"></i>
+          </el-upload>
+          <el-dialog :visible.sync="xcx_expo.dialogVisible">
+            <img width="100%" :src="xcx_expo.dialogImageUrl" alt="" />
+          </el-dialog>
         </el-form-item>
+
         <el-form-item label="座机号">
           <el-input v-model="form.telephone" class="input"></el-input>
         </el-form-item>
@@ -89,8 +108,10 @@ import URL from "@/config/index.js";
 export default {
   data() {
     return {
-      dialogImageUrl: "",
-      dialogVisible: false,
+      logo: {
+        dialogImageUrl: "",
+        dialogVisible: false,
+      },
       blFileList: [],
       form: {
         days_off: [],
@@ -104,33 +125,42 @@ export default {
         dialogVisible: false,
         blFileList: [],
       },
+      xcx_expo: {
+        dialogImageUrl: "",
+        dialogVisible: false,
+        blFileList: [],
+      },
     };
   },
   methods: {
-    delImg(file, fileList) {
+    delImg(file, fileList, key) {
       let arr = [];
       fileList.forEach((item) => {
         arr.push(item.url.replace(URL.baseUrl.pro, ""));
       });
-      this.form.xcx_event = JSON.stringify(arr);
+      this.form[key] = JSON.stringify(arr);
     },
-    successBanner(res, file, fileList) {
-      let arr = JSON.parse(this.form.xcx_event);
+    getImgurl(res, key) {
+      console.log(res, key);
+      if (key == "logo") {
+        this.form[key] = res.data.uri;
+        return;
+      }
+      let arr = JSON.parse(this.form[key]);
       arr.push(res.data.uri);
-      this.form.xcx_event = JSON.stringify(arr);
+      this.form[key] = JSON.stringify(arr);
     },
-    getImgurl(res) {
-      this.form.logo = res.data.uri;
-    },
-    handlePictureCardPreview(file) {
-      this.dialogImageUrl = file.url;
-      this.dialogVisible = true;
-    },
-    handlePictureCardPreview1(file) {
-      this.banner.dialogImageUrl = file.url;
-      this.banner.dialogVisible = true;
+    handlePictureCardPreview(file, key) {
+      this[key].dialogImageUrl = file.url;
+      this[key].dialogVisible = true;
     },
     onSubmit() {
+      const loading = this.$loading({
+        lock: true,
+        text: "Loading",
+        spinner: "el-icon-loading",
+        background: "rgba(0, 0, 0, 0.7)",
+      });
       this.form.days_off = [];
       this.day.forEach((item) => {
         if (item.status) {
@@ -138,6 +168,7 @@ export default {
         }
       });
       setShopData(this.form).then((res) => {
+        loading.close();
         if (!res.code) {
           this.$message({
             message: "修改成功",
@@ -170,6 +201,15 @@ export default {
             });
           });
         }
+        if (res.data.xcx_expo) {
+          let xcx_expo = JSON.parse(res.data.xcx_expo);
+
+          xcx_expo.forEach((item) => {
+            this.xcx_expo.blFileList.push({
+              url: `${URL.baseUrl.pro}${item}`,
+            });
+          });
+        }
         this.$set(this, "form", res.data);
       });
     },
@@ -198,6 +238,7 @@ export default {
       os: "web",
     };
     this.getShopData();
+    console.log(this["banner"]);
   },
 };
 </script>

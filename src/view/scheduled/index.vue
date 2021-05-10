@@ -43,8 +43,12 @@ export default {
   },
   data() {
     return {
-      componentName: "shop",
+      componentName: "reservationList",
       navName: [
+        {
+          name: "预约列表 ",
+          pageName: "reservationList",
+        },
         {
           name: "我的商铺 ",
           pageName: "shop",
@@ -68,10 +72,6 @@ export default {
         {
           name: "用户留言 ",
           pageName: "stay",
-        },
-        {
-          name: "预约列表 ",
-          pageName: "reservationList",
         },
       ],
       staff: [],
