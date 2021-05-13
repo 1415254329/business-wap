@@ -22,7 +22,11 @@
 </template>
 
 <script>
-import { getStaffList } from "@/api/scheduled.js";
+import {
+  getStaffList,
+  getShopData,
+  getScheduledList,
+} from "@/api/scheduled.js";
 import shop from "@/view/components/scheduled/shop";
 import serve from "@/view/components/scheduled/serve";
 import commodity from "@/view/components/scheduled/commodity";
@@ -30,7 +34,7 @@ import number from "@/view/components/scheduled/number";
 import reservationList from "@/view/components/scheduled/reservationList";
 import staff from "@/view/components/scheduled/staff";
 import stay from "@/view/components/scheduled/stay";
-
+import lookBoard from "@/view/components/scheduled/lookBoard";
 export default {
   components: {
     shop,
@@ -40,6 +44,7 @@ export default {
     reservationList,
     staff,
     stay,
+    lookBoard,
   },
   data() {
     return {
@@ -73,8 +78,14 @@ export default {
           name: "用户留言 ",
           pageName: "stay",
         },
+        {
+          name: "预约看板",
+          pageName: "lookBoard",
+        },
       ],
       staff: [],
+      shopData: null,
+      scheduledList: null,
     };
   },
   computed: {
@@ -90,6 +101,15 @@ export default {
     },
   },
   methods: {
+    getScheduledList() {
+      getScheduledList().then((res) => {
+        let tableData = [];
+        for (var p1 in res.data) {
+          tableData.push(res.data[p1]);
+        }
+        this.scheduledList = tableData
+      });
+    },
     handleSelect(key) {
       this.navName.forEach((item) => {
         if (item.name == key) {
@@ -106,9 +126,16 @@ export default {
         this.staff = tableData;
       });
     },
+    getShopData() {
+      getShopData().then((res) => {
+        this.$set(this, "shopData", res.data);
+      });
+    },
   },
   created() {
+    this.getShopData();
     this.getStaffList();
+    this.getScheduledList();
   },
 };
 </script>

@@ -241,6 +241,7 @@ export default {
   methods: {
     onSubmit() {
       this.formData.rest_day_list.week = this.initweek; //rest_day_list.week
+      console.log(this.formData)
       this.reservationTime.indexList.forEach((item, index) => {
         this.period[item].push(this.reservationTime.hs[index]);
       });

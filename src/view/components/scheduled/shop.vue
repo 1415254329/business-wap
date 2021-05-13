@@ -73,7 +73,8 @@
             :editable="false"
             v-model="form.business_start_hours"
             placeholder="请选择"
-            value-format="HH:mm:ss"
+            value-format="HH:mm"
+            format="HH:mm"
           >
           </el-time-picker>
         </el-form-item>
@@ -82,7 +83,8 @@
             :editable="false"
             v-model="form.business_end_hours"
             placeholder="请选择"
-            value-format="HH:mm:ss"
+            value-format="HH:mm"
+            format="HH:mm"
           >
           </el-time-picker>
         </el-form-item>
@@ -180,6 +182,7 @@ export default {
     //获取info信息
     getShopData() {
       getShopData().then((res) => {
+        console.log(res)
         this.forDay();
         if (res.data.days_off == "") {
           res.data.days_off = [];
@@ -238,7 +241,6 @@ export default {
       os: "web",
     };
     this.getShopData();
-    console.log(this["banner"]);
   },
 };
 </script>
