@@ -244,9 +244,6 @@ export default {
           startDay += 1;
         }
       }
-      console.log(this.tabNav, "20天列表");
-      /*  this.setRistDate();
-      this.getDailyTime(0); */
     },
     //获取当前日期
     getCurrentDate() {
@@ -276,9 +273,6 @@ export default {
     this.getTimeParagraph();
     this.getCurrentDate();
     this.filterDayData(this.activeName);
-    console.log(this.tableData, "tabel表");
-    console.log(this.filterData, "员工");
-    console.log(this.$parent.scheduledList, "服务列表");
   },
 };
 </script>
