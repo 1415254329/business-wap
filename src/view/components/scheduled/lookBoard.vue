@@ -8,7 +8,11 @@
         :key="index"
       ></el-tab-pane>
     </el-tabs>
-    <el-table :data="tableData" style="width: 100%">
+    <el-table
+      :data="tableData"
+      style="width: 100%"
+      :header-cell-style="rowClass"
+    >
       <el-table-column
         prop="time"
         label="姓名"
@@ -133,6 +137,14 @@ export default {
     };
   },
   methods: {
+    //设置表头的颜色
+    rowClass({ row, rowIndex }) {
+      let obj = {
+        background: "#dbf1dc",
+        color: "#44b548",
+      };
+      return obj;
+    },
     filterDayData(day) {
       let scheduledList = this.$parent.scheduledList;
       scheduledList.forEach((scheduled) => {
@@ -290,9 +302,11 @@ export default {
 }
 .el-table thead.is-group tr:first-of-type th:first-of-type div.cell {
   text-align: right;
+  color: #666;
 }
 .el-table thead.is-group tr:last-of-type th:first-of-type div.cell {
   text-align: left;
+  color: #666;
 }
 .el-table thead.is-group tr:first-of-type th:first-of-type:before {
   content: "";
