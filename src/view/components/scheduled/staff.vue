@@ -25,7 +25,7 @@
       <el-table-column prop="staff_name" label="名称"> </el-table-column>
       <el-table-column prop="gender" label="性别"> </el-table-column>
       <el-table-column prop="phone" label="手机号"> </el-table-column>
-      <el-table-column fixed="right" label="操作" width="300">
+      <el-table-column fixed="right" label="操作" width="400">
         <template slot-scope="scope">
           <el-button @click="setPhoto(scope.row)" type="success" size="small"
             >头像设置</el-button
@@ -68,19 +68,24 @@ export default {
     },
   },
   methods: {
-    savePhoto() {
-      let obj = {
-        department_id: this.form.position[0].department_id,
-        position_id: this.form.position[0].id,
-      };
-      this.form.position = JSON.stringify([obj]);
+    savePhoto(info) {
+
+      let arr = [];
+      for (let key in info.position) {
+        arr.push({
+          department_id: info.position[key].department_id,
+          position_id: info.position[key].id,
+        });
+      }
+      console.log(arr)
+      this.form.position = JSON.stringify(arr);
       setStaff(this.form).then((res) => {
         if (!res.code) {
           this.$message({
             message: "添加成功",
             type: "success",
           });
-          this.dialogStatus = false
+          this.dialogStatus = false;
         }
       });
     },
@@ -88,6 +93,7 @@ export default {
       this.form.icon = res.data.uri;
     },
     setPhoto(info) {
+      console.log(info);
       this.form = info;
       if (info.icon) {
         this.blFileList.push({
@@ -103,16 +109,19 @@ export default {
     //是否上下架
     delItem(info) {
       let status = info.xcx_online_switch;
+      let arr = [];
+      for (let key in info.position) {
+        arr.push({
+          department_id: info.position[key].department_id,
+          position_id: info.position[key].id,
+        });
+      }
       if (info.xcx_online_switch) {
         info.xcx_online_switch = 0;
       } else {
         info.xcx_online_switch = 1;
       }
-      let obj = {
-        department_id: info.position[0].department_id,
-        position_id: info.position[0].id,
-      };
-      info.position = JSON.stringify([obj]);
+      info.position = JSON.stringify(arr);
       setStaff(info).then((res) => {
         if (!res.code) {
           this.$message({
@@ -121,6 +130,7 @@ export default {
           });
           return;
         }
+
         info.xcx_online_switch = status;
       });
     },
@@ -132,6 +142,7 @@ export default {
       this.$refs.edit.offday.tags = [];
       this.$refs.edit.reservationTime.tags = [];
       this.$refs.edit.canTime = [];
+      this.$refs.edit.product.blFileList = [];
       getStaffSetting(e.id).then((res) => {
         this.$refs.edit.formData = {
           ahead_time: null,
@@ -146,11 +157,12 @@ export default {
           motto: null,
           brief: null,
           position: null,
-          product: null,
+          product:
+            res.data.product == "null" ? "[]" : JSON.parse(res.data.product),
         };
         if (res.data) {
           res.data.rest_day_list = JSON.parse(res.data.rest_day_list);
-          res.data.project_list = res.data.project_list.split(",")
+          res.data.project_list = res.data.project_list.split(",");
           this.$refs.edit.initData(res.data);
           this.$refs.edit.formData = res.data;
         }

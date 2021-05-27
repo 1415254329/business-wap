@@ -26,6 +26,7 @@ import {
   getStaffList,
   getShopData,
   getScheduledList,
+  getServeList,
 } from "@/api/scheduled.js";
 import shop from "@/view/components/scheduled/shop";
 import serve from "@/view/components/scheduled/serve";
@@ -86,6 +87,8 @@ export default {
       staff: [],
       shopData: null,
       scheduledList: null,
+      serveList: null,
+      vipList:null
     };
   },
   computed: {
@@ -101,15 +104,6 @@ export default {
     },
   },
   methods: {
-    getScheduledList() {
-      getScheduledList().then((res) => {
-        let tableData = [];
-        for (var p1 in res.data) {
-          tableData.push(res.data[p1]);
-        }
-        this.scheduledList = tableData
-      });
-    },
     handleSelect(key) {
       this.navName.forEach((item) => {
         if (item.name == key) {
@@ -117,25 +111,30 @@ export default {
         }
       });
     },
-    getStaffList() {
-      getStaffList().then((res) => {
-        let tableData = [];
-        for (var p1 in res.data) {
-          tableData.push(res.data[p1]);
-        }
-        this.staff = tableData;
-      });
-    },
     getShopData() {
       getShopData().then((res) => {
         this.$set(this, "shopData", res.data);
       });
     },
+    getServeList() {
+      getServeList().then((res) => {
+        let tableData = [];
+        for (var p1 in res.data) {
+          if (res.data.hasOwnProperty(p1)) {
+            res.data[p1].forEach((item) => {
+              if (!item.status) {
+                tableData.push(item);
+              }
+            });
+          }
+        }
+        this.serveList = tableData;
+      });
+    },
   },
   created() {
     this.getShopData();
-    this.getStaffList();
-    this.getScheduledList();
+    this.getServeList();
   },
 };
 </script>
@@ -156,4 +155,5 @@ export default {
     width: calc(~"100% - 210px");
   }
 }
+
 </style>

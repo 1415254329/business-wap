@@ -40,10 +40,10 @@
             :filter-method="search"
           >
             <el-option
-              v-for="item in serveProject"
-              :key="item.id"
+              v-for="(item, index) in serveProject"
+              :key="index"
+              :label="item.alias"
               :value="item.id"
-              :label="item.category_alias"
             >
             </el-option>
           </el-select>
@@ -124,6 +124,7 @@ export default {
               message: "添加成功",
               type: "success",
             });
+
             this.$parent.getServeList();
             this.getCloseDrawer();
           }
@@ -153,6 +154,8 @@ export default {
         for (var p1 in res.data.tenant_project) {
           this.serveProject.push(res.data.tenant_project[p1]);
         }
+
+        console.log(this.serveProject, 157);
       });
     },
   },

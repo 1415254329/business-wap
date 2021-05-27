@@ -33,6 +33,44 @@
       </el-form>
 
       <div class="scroll" v-if="isadd">
+        <div style="margin-bottom: 20px">
+          <el-row :gutter="20">
+            <el-col :span="6" :offset="3"
+              ><el-button
+                :type="!reservation.index ? 'primary' : ''"
+                round
+                @click="clickReservation(0)"
+                >会员预约</el-button
+              ></el-col
+            >
+            <el-col :span="6"
+              ><el-button
+                :type="reservation.index ? 'primary' : ''"
+                round
+                @click="clickReservation(1)"
+                >散客预约</el-button
+              ></el-col
+            >
+          </el-row>
+          <div class="demo-input-suffix flex labelBox">
+            <div class="label flex">会员选择</div>
+            <el-select
+              v-model="reservation.value"
+              placeholder="请选择"
+              :disabled="reservation.index == 0 ? false : true"
+              @change="setReservation"
+            >
+              <el-option
+                v-for="(item, index) in vipList"
+                :key="index"
+                :label="item.alias"
+                :value="item.id"
+              >
+              </el-option>
+            </el-select>
+          </div>
+        </div>
+
         <el-form
           ref="formData"
           :model="formData"
@@ -45,8 +83,21 @@
           <el-form-item label="预约人手机号" prop="phone">
             <el-input v-model="formData.phone" class="input"></el-input>
           </el-form-item>
-          <el-form-item label="预约人会员id" prop="member_id">
-            <el-input v-model="formData.member_id" class="input"></el-input>
+          <el-form-item label="预约项目">
+            <el-select
+              v-model="serveVal"
+              placeholder="请选择"
+              @change="changeServe"
+              :filter-method="search"
+            >
+              <el-option
+                v-for="(item, index) in serveList"
+                :key="index"
+                :value="item.alias"
+                :label="item.alias"
+              >
+              </el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="员工">
             <el-select
@@ -80,6 +131,9 @@
           <el-form-item label="人数">
             <el-input v-model="formData.body_count" class="input"></el-input>
           </el-form-item>
+         <!--  <el-form-item label="会员ID">
+            <el-input v-model="formData.member_id" class="input"></el-input>
+          </el-form-item> -->
           <el-button
             type="primary"
             @click="onSubmit('formData')"
@@ -96,12 +150,19 @@ import {
   setScheduled,
   addScheduled,
   getDepartmentList,
+  getVipList,
 } from "@/api/scheduled.js";
 import { getToken } from "@/utils/auth";
 export default {
   props: {},
   data() {
     return {
+      vipList: [],
+      reservation: {
+        index: 0,
+        value: null,
+        item: null,
+      },
       value: "",
       reason: null,
       options: [
@@ -123,6 +184,8 @@ export default {
           return time.getTime() < Date.now() - 8.64e7;
         },
       },
+      serveList: null,
+      serveVal: null,
       isadd: false,
       drawer: false,
       formData: {},
@@ -143,7 +206,6 @@ export default {
             trigger: "blur",
           },
         ],
-        member_id: [{ required: true, message: "请输入id", trigger: "blur" }],
       },
     };
   },
@@ -153,6 +215,29 @@ export default {
     },
   },
   methods: {
+    setReservation(e) {
+
+      let item = this.$parent.$parent.vipList.filter(
+        (item, index) => item.id == e
+      );
+      this.reservation.item = item;
+      this.formData.alias = item[0].alias;
+      this.formData.phone = item[0].phone;
+      this.formData.member_id = item[0].id;
+      console.log(this.formData.member_id);
+    },
+    clickReservation(e) {
+      this.reservation.index = e;
+      if (e == 1) {
+        this.reservation.value = null;
+        this.formData.alias = null;
+        this.formData.phone = null;
+        this.formData.member_id = null;
+      }
+    },
+    changeServe(e) {
+      this.formData.project_list.tenant_project = [e];
+    },
     setReser() {
       //修改预约
       let data = `status=${this.value}&reason=${this.reason}`;
@@ -162,7 +247,7 @@ export default {
             message: "更新成功",
             type: "success",
           });
-          
+          this.drawer = false;
         }
       });
     },
@@ -173,7 +258,6 @@ export default {
       this.formData.category_str = e;
     },
     changeSelect(e) {
-      console.log(this.formData);
       this.serveProject.forEach((item) => {
         if (item.id == e) {
           this.formData.category_id = item.id;
@@ -215,6 +299,7 @@ export default {
         this.formData.gender == "女"
           ? (this.formData.gender = 0)
           : (this.formData.gender = 1);
+        this.formData.project_list = JSON.stringify(this.formData.project_list);
         if (this.isadd) {
           addScheduled(this.setParam(this.formData)).then((res) => {
             if (!res.code) {
@@ -244,8 +329,17 @@ export default {
         this.serveProject = res.data;
       });
     },
+    initList() {
+      //初始化列表
+      getVipList().then((res) => {
+        let arr = res.data.filter((item, inex) => item.status == 0);
+        this.vipList = arr;
+        this.$parent.$parent.vipList = arr;
+      });
+    },
   },
   created() {
+    this.initList();
     this.getDepartmentList();
     this.header = {
       Authorization: getToken(),
@@ -255,6 +349,19 @@ export default {
 };
 </script>
 <style>
+.labelBox {
+  align-items: center;
+  margin-top: 20px;
+}
+.label {
+  width: 140px;
+  justify-content: flex-end;
+  align-items: center;
+  margin-right: 20px;
+}
+.flex {
+  display: flex;
+}
 .scroll {
   height: 800px;
   overflow-y: scroll;

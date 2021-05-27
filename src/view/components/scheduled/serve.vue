@@ -30,7 +30,7 @@
 <script>
 import { getServeList, delServeProject } from "@/api/scheduled.js";
 import edit from "@/view/components/scheduled/comments/edit";
-import URL from "@/config/index.js"
+import URL from "@/config/index.js";
 export default {
   components: { edit },
   data() {
@@ -53,7 +53,7 @@ export default {
   methods: {
     //删除
     delItem(index) {
-      console.log(index)
+      console.log(index);
       let that = this;
       this.$Modal.confirm({
         title: "信息",

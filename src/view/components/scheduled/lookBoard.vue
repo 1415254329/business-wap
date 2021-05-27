@@ -85,6 +85,36 @@
                   ].statusText
                 }}
               </p>
+              <p>
+                预约项目:
+                {{
+                  scope.row.scheduledList[
+                    scope.row.scheduledList.findIndex(
+                      (item) => item.staff_id == scope.column.labelClassName
+                    )
+                  ].project_list
+                }}
+              </p>
+              <p>
+                预约人数:
+                {{
+                  scope.row.scheduledList[
+                    scope.row.scheduledList.findIndex(
+                      (item) => item.staff_id == scope.column.labelClassName
+                    )
+                  ].body_count
+                }}
+              </p>
+               <p>
+                备注:
+                {{
+                  scope.row.scheduledList[
+                    scope.row.scheduledList.findIndex(
+                      (item) => item.staff_id == scope.column.labelClassName
+                    )
+                  ].remake
+                }}
+              </p>
               <div slot="reference" class="name-wrapper">
                 <el-tag
                   size="medium"
@@ -162,6 +192,13 @@ export default {
             : scheduled.status == 2
             ? "拒绝"
             : "取消";
+
+        scheduled.project_list =
+          scheduled.project_list == null || scheduled.project_list == {}
+            ? {
+                tenant_project: ["未设置项目"],
+              }
+            : scheduled.project_list;
         if (scheduled.arrival_time.substring(8, 10) == day) {
           let i = this.tableData.findIndex(
             (item) =>
@@ -285,6 +322,8 @@ export default {
     this.getTimeParagraph();
     this.getCurrentDate();
     this.filterDayData(this.activeName);
+
+    /*  console.log(this.$parent.scheduledList) */
   },
 };
 </script>

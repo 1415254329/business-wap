@@ -32,8 +32,6 @@
               placeholder="请选择"
               value-key="id"
               multiple
-          
-              
             >
               <el-option
                 v-for="item in filterServeData"
@@ -66,6 +64,7 @@
               <el-tag
                 v-for="(item, index) in offday.tags"
                 :key="index + 'tag'"
+                @close="delReservationTags1(index)"
                 closable
               >
                 {{ item }}
@@ -76,7 +75,7 @@
             </div>
           </el-form-item>
           <el-form-item label="预约时间设置">
-            <el-checkbox-group v-model="canTime">
+            <el-checkbox-group v-model="canTime" @change="asdqwe">
               <el-checkbox
                 v-for="(item, index) in week"
                 :key="index + 'week'"
@@ -91,9 +90,9 @@
                 v-for="(item, index) in reservationTime.tags"
                 :key="index + 'time'"
                 closable
-                @close="delReservationTags(index)"
+                @close="delReservationTags(item, index)"
               >
-                {{ item }}
+                {{ item.name }}
               </el-tag>
             </div>
             <!-- /不可预约tag -->
@@ -147,6 +146,23 @@
               type="text"
             ></el-input>
           </el-form-item>
+          <el-form-item label="作品">
+            <el-upload
+              :headers="header"
+              name="img"
+              :action="url"
+              list-type="picture-card"
+              :limit="5"
+              :file-list="product.blFileList"
+              :on-remove="(file, fileList) => delImg(file, fileList, 'product')"
+              :on-success="(file) => getImgurl(file, 'product')"
+            >
+              <i class="el-icon-plus"></i>
+            </el-upload>
+            <el-dialog :visible.sync="product.dialogVisible">
+              <img width="100%" :src="product.dialogImageUrl" alt="" />
+            </el-dialog>
+          </el-form-item>
           <el-button
             type="primary"
             @click="onSubmit('formData')"
@@ -160,6 +176,8 @@
 </template>
 <script>
 import { getServeList, getReservationSetting } from "@/api/scheduled.js";
+import { getToken } from "@/utils/auth";
+import URL from "@/config/index.js";
 export default {
   props: {},
   computed: {
@@ -175,6 +193,13 @@ export default {
   },
   data() {
     return {
+      url: null,
+      header: null,
+      product: {
+        dialogImageUrl: "",
+        dialogVisible: false,
+        blFileList: [],
+      },
       isServerList: ["烫发"],
       offday: {
         date: null,
@@ -239,19 +264,29 @@ export default {
   },
 
   methods: {
+    asdqwe() {},
+    getImgurl(res, key) {
+      let arr =
+        this.formData[key] == "null" ? [] : JSON.parse(this.formData[key]);
+      arr.push(res.data.uri);
+      this.formData[key] = JSON.stringify(arr);
+    },
+    delImg(file, fileList, key) {
+      let arr = [];
+      fileList.forEach((item) => {
+        arr.push(item.url.replace(URL.baseUrl.pro, ""));
+      });
+      this.formData[key] = JSON.stringify(arr);
+    },
     onSubmit() {
       this.formData.rest_day_list.week = this.initweek; //rest_day_list.week
-      console.log(this.formData)
-      this.reservationTime.indexList.forEach((item, index) => {
-        this.period[item].push(this.reservationTime.hs[index]);
-      });
-      this.offday.formOffDate.forEach((item) => {
-        this.formData.rest_day_list.date.push(item);
-      }); //rest_day_list.date
+      console.log(this.formData);
       this.formData.rest_day_list = JSON.stringify(this.formData.rest_day_list);
+      this.reservationTime.canRe = [0, 0, 0, 0, 0, 0, 0];
       this.canTime.forEach((item) => {
         this.reservationTime.canRe[item] = 1;
       });
+      console.log(this.reservationTime.canRe);
       this.formData.week = this.reservationTime.canRe; //formData.week
       this.formData.project_list = this.isServerList;
       let urlData = `${this.id}?`;
@@ -264,20 +299,46 @@ export default {
             message: "添加成功",
             type: "success",
           });
+          this.drawer = false;
         }
       });
     },
-    delReservationTags(index) {
+
+    delReservationTags(item, index) {
       this.reservationTime.tags.splice(index, 1);
+      let stringNUm = item.name.substring(4, 10);
+      for (let i = 0; i < this.period[item.week].length; i++) {
+        if (this.period[item.week][i] == stringNUm) {
+          this.period[item.week].splice(i, 1);
+          break;
+        }
+      }
     },
     addNoDate() {
-      this.reservationTime.tags.push(
-        `${this.week[this.reservationTime.noweek].name} ${
-          this.reservationTime.notime
-        }`
+      let isHave = this.period[this.reservationTime.noweek].indexOf(
+        this.reservationTime.notime
       );
-      this.reservationTime.indexList.push(this.reservationTime.noweek);
-      this.reservationTime.hs.push(this.reservationTime.notime);
+      if (isHave == -1) {
+        this.reservationTime.tags.push({
+          name: `${this.week[this.reservationTime.noweek].name} ${
+            this.reservationTime.notime
+          }`,
+          week: this.week[this.reservationTime.noweek].index,
+        });
+
+        this.reservationTime.indexList.push(this.reservationTime.noweek);
+        this.reservationTime.hs.push(this.reservationTime.notime);
+        this.period[this.reservationTime.noweek].push(
+          this.reservationTime.notime
+        );
+        return;
+      }
+      this.$message("该时间添加了");
+    },
+    delReservationTags1(index) {
+      this.offday.tags.splice(index, 1);
+      this.formData.rest_day_list.date.splice(index, 1);
+      console.log(this.offday.tags, this.formData.rest_day_list.date, 310);
     },
     addTag() {
       this.offday.tags.push(
@@ -288,6 +349,12 @@ export default {
         start: this.offday.time[0],
         end: this.offday.time[1],
       });
+      this.formData.rest_day_list.date.push({
+        date: this.offday.date,
+        start: this.offday.time[0],
+        end: this.offday.time[1],
+      });
+      console.log(this.offday.tags, this.formData.rest_day_list.date, 355);
     },
     getServeList() {
       getServeList().then((res) => {
@@ -307,6 +374,7 @@ export default {
     },
 
     initData(e) {
+      console.log(e);
       let canRe = e.week.split(",");
       canRe.forEach((item, index) => {
         if (item == "1") {
@@ -320,20 +388,35 @@ export default {
       });
       e.rest_day_list.period.forEach((item, index) => {
         item.forEach((time) => {
-          this.reservationTime.tags.push(`${this.week[index].name} ${time}`);
+          this.reservationTime.tags.push({
+            name: `${this.week[index].name} ${time}`,
+            week: index,
+          });
         });
       });
-      this.isServerList = e.project_list
+      this.isServerList = e.project_list;
+      if (e.product != "null") {
+        JSON.parse(e.product).forEach((item) => {
+          this.product.blFileList.push({
+            url: `${URL.baseUrl.pro}${item}`,
+          });
+        });
+      }
     },
   },
   created() {
     this.getServeList();
+    this.url = URL.baseUrl.pro + "/api/upload";
+    this.header = {
+      Authorization: getToken(),
+      os: "web",
+    };
   },
 };
 </script>
 <style>
 .scroll {
-  height: 800px;
+  height: 80vh;
   overflow-y: scroll;
 }
 /*定义滑块 内阴影+圆角*/

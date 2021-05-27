@@ -171,8 +171,7 @@ export function getStaffSetting(data) {
 }
 
 //创建员工预约设置
-export function getReservationSetting(data){
-    console.log(data)
+export function getReservationSetting(data) {
     return axios.request({
         url: `/api/staff/reservation/${data}`,
         method: 'POST',
@@ -181,9 +180,31 @@ export function getReservationSetting(data){
 }
 
 
+//获取会员列表
+export function getVipList(data) {
+    return axios.request({
+        url: `api/member`,
+        method: 'GET',
+        data
+    })
+}
 
-
-
+//获取带有未读消息记录的会员列表
+export function getUnreadList(data) {
+    return axios.request({
+        url: `api/chat/unread`,
+        method: 'GET',
+        data
+    })
+}
+//获取指定会员的消息记录
+export function getMenberId(data) {
+    return axios.request({
+        url: `api/chat/${data}`,
+        method: 'GET',
+        data
+    })
+}
 
 
 
