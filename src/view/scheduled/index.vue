@@ -88,7 +88,7 @@ export default {
       shopData: null,
       scheduledList: null,
       serveList: null,
-      vipList:null
+      vipList: null,
     };
   },
   computed: {

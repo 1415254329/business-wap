@@ -35,9 +35,18 @@
     </el-row>
 
     <el-table :data="filterData" style="width: 100%">
+      <el-table-column prop="alias" label="预约日期">
+        <template slot-scope="scope">
+          <div>
+            {{ scope.row.arrival_time.substring(0, 11) }}
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column prop="alias" label="预约人名称">
         <template slot-scope="scope">
-          <div>{{ scope.row.alias }}{{scope.row.member_id?'(会员)':'(散客)'}}</div>
+          <div>
+            {{ scope.row.alias }}{{ scope.row.member_id ? "(会员)" : "(散客)" }}
+          </div>
         </template>
       </el-table-column>
       <el-table-column prop="phone" label="预约人手机号"> </el-table-column>
@@ -57,7 +66,7 @@
       </el-table-column>
       <el-table-column prop="project_list" label="预约项目">
         <template slot-scope="scope">
-          <div>{{ scope.row.project_list}}</div>
+          <div>{{ scope.row.project_list }}</div>
         </template>
       </el-table-column>
       <el-table-column prop="status" label="预约状态">
@@ -87,11 +96,7 @@
   </div>
 </template>
 <script>
-import {
-  getScheduledList,
-  delStaff,
-  getStaffList
-} from "@/api/scheduled.js";
+import { getScheduledList, delStaff, getStaffList } from "@/api/scheduled.js";
 import edit from "@/view/components/scheduled/comments/reservationedit";
 import URL from "@/config/index.js";
 export default {
@@ -104,11 +109,7 @@ export default {
       },
       propsId: 0,
       tableData: [],
-      staffList: [
-        {
-          staff_name: null,
-        },
-      ],
+      staffList: [],
     };
   },
   computed: {

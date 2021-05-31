@@ -205,6 +205,31 @@ export function getMenberId(data) {
         data
     })
 }
+//条件筛选消息列表
+export function getFilterNews(data) {
+    return axios.request({
+        url: `api/chat/search${data}`,
+        method: 'GET',
+        data
+    })
+}
+//已读消息
+export function getInRead(data) {
+    return axios.request({
+        url: `/api/chat/read`,
+        method: 'PUT',
+        data
+    })
+}
+//发消息给会员
+export function sendNewsToVip(data) {
+    return axios.request({
+        url: `/api/chat`,
+        method: 'POST',
+        data
+    })
+}
+
 
 
 

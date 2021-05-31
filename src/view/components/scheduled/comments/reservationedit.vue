@@ -54,11 +54,21 @@
           </el-row>
           <div class="demo-input-suffix flex labelBox">
             <div class="label flex">会员选择</div>
-            <el-select
+            <el-autocomplete
+              class="inline-input"
+              v-model="reservation.value"
+              :fetch-suggestions="querySearch"
+              placeholder="请输入会员名"
+              :trigger-on-focus="false"
+              value-key="alias"
+              @select="setReservation"
+            ></el-autocomplete>
+            <!-- <el-select
               v-model="reservation.value"
               placeholder="请选择"
               :disabled="reservation.index == 0 ? false : true"
               @change="setReservation"
+              filterable
             >
               <el-option
                 v-for="(item, index) in vipList"
@@ -67,7 +77,7 @@
                 :value="item.id"
               >
               </el-option>
-            </el-select>
+            </el-select> -->
           </div>
         </div>
 
@@ -131,7 +141,7 @@
           <el-form-item label="人数">
             <el-input v-model="formData.body_count" class="input"></el-input>
           </el-form-item>
-         <!--  <el-form-item label="会员ID">
+          <!--  <el-form-item label="会员ID">
             <el-input v-model="formData.member_id" class="input"></el-input>
           </el-form-item> -->
           <el-button
@@ -215,16 +225,26 @@ export default {
     },
   },
   methods: {
+    querySearch(queryString, cb) {
+      var restaurants = this.vipList;
+      var results = queryString
+        ? restaurants.filter(this.createFilter(queryString))
+        : restaurants;
+      // 调用 callback 返回建议列表的数据
+      cb(results);
+    },
+    createFilter(queryString) {
+      return (restaurant) => {
+        return (
+          restaurant.alias.toLowerCase().indexOf(queryString.toLowerCase()) ===
+          0
+        );
+      };
+    },
     setReservation(e) {
-
-      let item = this.$parent.$parent.vipList.filter(
-        (item, index) => item.id == e
-      );
-      this.reservation.item = item;
-      this.formData.alias = item[0].alias;
-      this.formData.phone = item[0].phone;
-      this.formData.member_id = item[0].id;
-      console.log(this.formData.member_id);
+      this.formData.alias = e.alias;
+      this.formData.phone = e.phone;
+      this.formData.member_id = e.id;
     },
     clickReservation(e) {
       this.reservation.index = e;
@@ -236,7 +256,7 @@ export default {
       }
     },
     changeServe(e) {
-      this.formData.project_list.tenant_project = [e];
+      this.formData.project_list = e;
     },
     setReser() {
       //修改预约
@@ -299,7 +319,7 @@ export default {
         this.formData.gender == "女"
           ? (this.formData.gender = 0)
           : (this.formData.gender = 1);
-        this.formData.project_list = JSON.stringify(this.formData.project_list);
+        console.log(this.setParam(this.formData));
         if (this.isadd) {
           addScheduled(this.setParam(this.formData)).then((res) => {
             if (!res.code) {
